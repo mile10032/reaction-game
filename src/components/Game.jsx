@@ -20,7 +20,7 @@ const MAX_REACTION_TIME = 600;
 const FAKE_DURATION = 1500;
 
 // 📤 シェア用のURL（Vercelデプロイ先）
-const SHARE_URL = "https://reaction-game-lite.vercel.app";
+const SHARE_URL = "https://reaction-game-jet.vercel.app";
 
 // 📳 バイブレーション機能
 const vibrate = (pattern) => {
