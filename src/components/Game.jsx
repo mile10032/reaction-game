@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
+// 🔊 サウンド素材のインポート
 import startSound from "../assets/start.mp3";
 import cueSound from "../assets/cue.mp3";
 import goodSound from "../assets/good.mp3";
@@ -9,6 +10,7 @@ import failSound from "../assets/fail.mp3";
 import retrySound from "../assets/retry.mp3";
 import resultSound from "../assets/result.mp3";
 
+// ⚙️ ゲーム設定用定数
 const NORMAL_ROUNDS = 5;
 const ADVANCED_ROUNDS = 10;
 const MAX_MISSES = 3;
@@ -16,8 +18,11 @@ const PERFECT_THRESHOLD = 30;
 const GOOD_THRESHOLD = 100;
 const MAX_REACTION_TIME = 600;
 const FAKE_DURATION = 1500;
-const SHARE_URL = "https://your-game-url.com";
 
+// 📤 シェア用のURL（Vercelデプロイ先）
+const SHARE_URL = "https://reaction-game-lite.vercel.app";
+
+// 📳 バイブレーション機能
 const vibrate = (pattern) => {
   if (navigator.vibrate) {
     navigator.vibrate(pattern);
@@ -25,6 +30,7 @@ const vibrate = (pattern) => {
 };
 
 export default function Game() {
+  // 🎮 ゲームの状態管理
   const [gameState, setGameState] = useState("idle");
   const [mode, setMode] = useState("normal");
   const [round, setRound] = useState(0);
@@ -35,9 +41,12 @@ export default function Game() {
   const [bgClass, setBgClass] = useState("bg-gray-200");
   const [isFake, setIsFake] = useState(false);
   const [animClass, setAnimClass] = useState("");
+
+  // 🧠 タイマーの参照用
   const timeoutRef = useRef(null);
   const fakeTimeoutRef = useRef(null);
 
+  // 🔊 サウンドの参照用
   const startRef = useRef(null);
   const cueRef = useRef(null);
   const goodRef = useRef(null);
@@ -47,6 +56,7 @@ export default function Game() {
   const retryRef = useRef(null);
   const resultRef = useRef(null);
 
+  // 🔁 サウンド再生共通関数
   const play = (ref) => {
     if (ref.current) {
       ref.current.currentTime = 0;
@@ -54,6 +64,7 @@ export default function Game() {
     }
   };
 
+  // 🧠 スコアに応じたランクを返す
   const getRank = (score) => {
     if (score >= 1600) return "Sランク 🏆";
     if (score >= 1200) return "Aランク 🎯";
@@ -62,6 +73,7 @@ export default function Game() {
     return "Dランク 🐢";
   };
 
+  // 📋 結果をクリップボードにコピーする
   const handleShare = async () => {
     const text = `🎮 反射神経ゲーム結果：\nスコア：${score}点（${getRank(score)}）でクリア！\n👉 ${SHARE_URL}`;
     try {
@@ -72,10 +84,40 @@ export default function Game() {
     }
   };
 
+  // 🐦 X（Twitter）で投稿する
   const handleXShare = () => {
     const tweet = encodeURIComponent(`🎮 反射神経ゲーム結果：\nスコア：${score}点（${getRank(score)}）でクリア！\n👉 ${SHARE_URL}`);
     window.open(`https://twitter.com/intent/tweet?text=${tweet}`, "_blank");
   };
+
+  // 🕹️ ゲームスタート
+  const handleStart = (selectedMode) => {
+    play(startRef);
+    setMode(selectedMode);
+    setRound(0);
+    setScore(0);
+    setMisses(0);
+    setGameState("starting");
+    setTimeout(() => {
+      setRound(1);
+      startRound();
+    }, 1000);
+  };
+
+  // 🔁 リトライボタン押下時
+  const handleRetry = () => {
+    play(retryRef);
+    handleStart(mode);
+  };
+
+  // 🔙 タイトルに戻る
+  const handleBackToStart = () => {
+    setGameState("idle");
+    setMessage("モードを選んでね");
+    setBgClass("bg-gray-200");
+  };
+
+  // 🚦 ラウンドの開始処理
   const startRound = () => {
     const delay = Math.floor(Math.random() * 3000) + 1000;
     const fake = mode === "advanced" && Math.random() < 0.3;
@@ -106,30 +148,7 @@ export default function Game() {
     setGameState("waiting");
   };
 
-  const handleStart = (selectedMode) => {
-    play(startRef);
-    setMode(selectedMode);
-    setRound(0);
-    setScore(0);
-    setMisses(0);
-    setGameState("starting");
-    setTimeout(() => {
-      setRound(1);
-      startRound();
-    }, 1000);
-  };
-
-  const handleRetry = () => {
-    play(retryRef);
-    handleStart(mode);
-  };
-
-  const handleBackToStart = () => {
-    setGameState("idle");
-    setMessage("モードを選んでね");
-    setBgClass("bg-gray-200");
-  };
-
+  // 👆 画面クリック時の処理
   const handleClick = () => {
     if (gameState === "cue") {
       if (isFake) {
@@ -213,6 +232,7 @@ export default function Game() {
     }
   };
 
+  // 🖼️ 表示部分
   return (
     <div
       className={`flex flex-col items-center justify-center h-screen text-center transition-colors duration-200 ${bgClass}`}
@@ -274,6 +294,7 @@ export default function Game() {
         </>
       )}
 
+      {/* 🔊 サウンド要素 */}
       <audio ref={startRef} src={startSound} />
       <audio ref={cueRef} src={cueSound} />
       <audio ref={goodRef} src={goodSound} />
